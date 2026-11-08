@@ -74,6 +74,7 @@ if uploaded_file is not None:
                 # Executive API Call
                 completion = client.chat.completions.create(
                     model="qwen/qwen3.8-27b",
+                    max_tokens= 600, # Limits the response length to prevent TPM rate limits
                     messages=[
                         {
                             "role": "system",
@@ -82,9 +83,9 @@ if uploaded_file is not None:
                                     "type": "text",
                                     "text": (
                                         "You are an expert chemical safety and hazard analysis assistant. "
-                                        "Always provide a thorough, detailed analysis of household containers, "
+                                        "Always provide a concise, clear and direct analysis of household containers, "
                                         "identifying the product type, potential toxicities, handling precautions,"
-                                        "and emergency first-aid measures. Never reply with single-letter answers."
+                                        "and focus mostly on emergency first-aid measures. Never reply with single-letter answers."
                                     )
                                 }
                             ]
@@ -99,7 +100,8 @@ if uploaded_file is not None:
                                         "1. Identification of the item/chemical.\n"
                                         "2. Classification (Household chemical, food, beverage, etc.).\n"
                                         "3. Potential health or safety hazards.\n"
-                                        "4. Recommended safety precautions."
+                                        "4. Recommended safety precautions.\n"
+                                        "5. Emergency first-aid measures."
                                     )
                                 },
                                 {
@@ -124,15 +126,42 @@ if uploaded_file is not None:
                 st.success("Analysis Complete!")
                 st.subheader("Hazard Assessment & Safety Guidance")
 
-                if "[RISK: HIGH]" in full_response:
+                # Convert response to uppercase for easier matching
+                response_upper = full_response.upper()
+
+                # Check for risk levels flexibility (handles bolding)
+                if "HIGH" in response_upper and "RISK" in response_upper and ("HIGH" in response_upper.split("RISK")[0] or "HIGH" in response_upper.split("RISK")[1][:10]):
+                    # Fallback cleaner check
+                    pass 
+
+                # Robust risk parsing using flexible string checks
+                if "[RISK: HIGH]" in full_response or "**[RISK: HIGH]**" in full_response or "RISK LEVEL: HIGH" in response_upper:
                     st.error("⚠️ HIGH RISK DETECTED: Hazardous/Toxic Substance")
-                elif "[RISK: MEDIUM]" in full_response:
+                elif "[RISK: MEDIUM]" in full_response or "**[RISK: MEDIUM]**" in full_response or "RISK LEVEL: MEDIUM" in response_upper:
                     st.warning("⚡ MODERATE RISK DETECTED: Exercise Caution & Read Precautions")
-                elif "[RISK: LOW]" in full_response:
+                elif "[RISK: LOW]" in full_response or "**[RISK: LOW]**" in full_response or "RISK LEVEL: LOW" in response_upper:
                     st.info("✅ LOW RISK DETECTED: Standard Handling Precautions Apply")
+                else:
+                    # Default fallback banner if the model missed the tag entirely
+                    st.info("ℹ️ Risk Level Not Explicitly Detected: Review Full Analysis Below")
+
+                # Clean uo the response by removing the risk tags before display
+                cleaned_response = (
+                    full_response
+                    .replace("[RISK: HIGH]", "")
+                .replace("[RISK: MEDIUM]", "")
+                .replace("[RISK: LOW]", "")
+                .replace("**[RISK: HIGH]**", "")
+                .replace("**[RISK: MEDIUM]**", "") 
+                .replace("**[RISK: LOW]**", "")
+                )
 
                 # Render full textual analysis below the visual alerts
-                st.write(full_response.replace("[RISK: HIGH]", "").replace("[RISK: MEDIUM]", "").replace("[RISK: LOW]", ""))
+                st.write(cleaned_response)
+
+                # Debug expander: Allows us to inspect the raw model output if formatting acts up
+                with st.expander("View Raw Model Output"):
+                    st.code(full_response)
 
             except Exception as e:
                 st.error(f"An error occurred during analysis: {str(e)}")
