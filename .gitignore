@@ -7,3 +7,6 @@ __pycache__/
 
 # Windows system files
 desktop.ini 
+
+# AI Agent / Editor metadata folders
+.agents/
