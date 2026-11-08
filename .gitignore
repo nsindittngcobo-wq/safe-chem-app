@@ -4,3 +4,6 @@
 # Python cache & temporary files
 __pycache__/ 
 *.pyc   
+
+# Windows system files
+desktop.ini 
