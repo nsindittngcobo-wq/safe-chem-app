@@ -113,6 +113,8 @@ if uploaded_file is not None:
                     ]
                 )
 
+                full_response = completion.choices[0].message.content
+
                 # ================================
                 # STAGE 4: Displaying Formatted Analysis Results
                 # 
@@ -121,7 +123,16 @@ if uploaded_file is not None:
                 # ================================
                 st.success("Analysis Complete!")
                 st.subheader("Hazard Assessment & Safety Guidance")
-                st.write(completion.choices[0].message.content)
+
+                if "[RISK: HIGH]" in full_response:
+                    st.error("⚠️ HIGH RISK DETECTED: Hazardous/Toxic Substance")
+                elif "[RISK: MEDIUM]" in full_response:
+                    st.warning("⚡ MODERATE RISK DETECTED: Exercise Caution & Read Precautions")
+                elif "[RISK: LOW]" in full_response:
+                    st.info("✅ LOW RISK DETECTED: Standard Handling Precautions Apply")
+
+                # Render full textual analysis below the visual alerts
+                st.write(full_response.replace("[RISK: HIGH]", "").replace("[RISK: MEDIUM]", "").replace("[RISK: LOW]", ""))
 
             except Exception as e:
                 st.error(f"An error occurred during analysis: {str(e)}")
