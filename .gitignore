@@ -1,0 +1,6 @@
+# Sensitive environment credentials
+.env
+
+# Python cache & temporary files
+__pycache__/ 
+*.pyc   
