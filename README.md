@@ -34,5 +34,5 @@ SafeChem is an intelligent computer vision application designed to identify hous
 ## 🔧 Setup & Execution
 1. Clone the repository:
    ```bash
-   git clone https://github.com/nsindittngcobo-wq/safe-chem-app.git
+   git clone [SafeChem Repository](https://github.com/nsindittngcobo-wq/safe-chem-app.git)
    cd safe-chem-app
