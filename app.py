@@ -57,12 +57,20 @@ tab1, tab2 = st.tabs(["📸 AI Vision Scan", "🔎 Dynamic Text Search"])
 with tab1:
     st.header("Container Vision Analysis")
     st.write("Upload an image of a household product or container to analyse potential hazards.")
-    
-    uploaded_file = st.file_uploader(
-     "Choose an image...",
-     type = ["png", "jpg", "jpeg", "webp"],
-     key ="vision upload"
-     )
+
+    # Give users a choice: Take a live photo or upload from device
+    input_method = st.radio("Choose input method:", ("Take a Photo", "Upload Image File"), horizontal=True, key="vision_input_mode")
+
+    uploaded_file = None
+
+    if input_method == "Take a Photo":
+        uploaded_file = st.camera_input("Snap a picture of the product label", key="camera_capture")
+    else:
+        uploaded_file = st.file_uploader(
+        "Choose an image...",
+        type = ["png", "jpg", "jpeg", "webp"],
+        key ="vision upload"
+        )
 
 # =========================================
 # STAGE 3: Image Preview & Multimodal Analysis Execution
